@@ -1,29 +1,53 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from ai_features import admin_ai_query  
+import admin_ai_query  # ✅ Corrected path
+
 
 class AdminAIPage(tk.Frame):
     def __init__(self, master, dashboard):
-        super().__init__(master)
+        super().__init__(master, bg="#4B0082")  # Dark purple background for Admin
         self.master = master
         self.dashboard = dashboard
         self.pack(fill="both", expand=True)
         self.create_widgets()
 
     def create_widgets(self):
-        tk.Label(self, text="🤖 BookHive AI Query Assistant", font=("Helvetica", 16, "bold")).pack(pady=15)
+        title = tk.Label(
+            self,
+            text="🤖 BookHive AI Query Assistant",
+            font=("Helvetica", 18, "bold"),
+            bg="#4B0082", fg="white"
+        )
+        title.pack(pady=15)
 
-        self.query_entry = tk.Entry(self, width=60, font=("Arial", 12))
+        self.query_entry = tk.Entry(
+            self, width=60, font=("Arial", 12),
+            bg="#D8BFD8", fg="black", relief="flat"
+        )
         self.query_entry.pack(pady=10)
-        tk.Button(self, text="Ask AI", command=self.process_query, width=20).pack(pady=5)
+
+        tk.Button(
+            self, text="Ask AI", command=self.process_query,
+            width=20, bg="#9370DB", fg="white", relief="flat"
+        ).pack(pady=5)
+
+        style = ttk.Style()
+        style.configure("Treeview", background="#E6E6FA", fieldbackground="#E6E6FA", foreground="black")
+        style.configure("Treeview.Heading", background="#6A0DAD", foreground="white")
 
         self.result_tree = ttk.Treeview(self, columns=("col1", "col2"), show="headings", height=10)
         self.result_tree.pack(pady=10)
 
-        self.status_label = tk.Label(self, text="", font=("Arial", 11))
+        self.status_label = tk.Label(
+            self, text="", font=("Arial", 11),
+            bg="#4B0082", fg="white"
+        )
         self.status_label.pack(pady=5)
 
-        tk.Button(self, text="⬅️ Back", command=self.go_back, width=20).pack(pady=10)
+        tk.Button(
+            self, text="⬅️ Back", command=self.go_back,
+            width=20, bg="#9370DB", fg="white", relief="flat"
+        ).pack(pady=10)
 
     def process_query(self):
         query = self.query_entry.get().strip()

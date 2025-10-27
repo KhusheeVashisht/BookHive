@@ -8,28 +8,51 @@ class LoginPage(tk.Frame):
         super().__init__(master)
         self.master = master
         self.switch_to_register = switch_to_register
-        self.switch_to_admin_login = switch_to_admin_login  # optional callback
+        self.switch_to_admin_login = switch_to_admin_login
+        self.theme = master.get_theme()  # get current theme
+        self.configure(bg=self.theme["bg"])
         self.create_widgets()
+        self.apply_theme()  # apply colors
 
     def create_widgets(self):
-        tk.Label(self, text="BookHive Login", font=("Helvetica", 18, "bold")).pack(pady=20)
+        self.title_label = tk.Label(self, text="BookHive Login", font=("Helvetica", 18, "bold"))
+        self.title_label.pack(pady=20)
 
-        tk.Label(self, text="Email:").pack(pady=5)
+        self.email_label = tk.Label(self, text="Email:")
+        self.email_label.pack(pady=5)
         self.email_entry = tk.Entry(self)
         self.email_entry.pack()
 
-        tk.Label(self, text="Password:").pack(pady=5)
+        self.password_label = tk.Label(self, text="Password:")
+        self.password_label.pack(pady=5)
         self.password_entry = tk.Entry(self, show="*")
         self.password_entry.pack()
 
-        tk.Button(self, text="Login", command=self.login_user).pack(pady=20)
+        self.login_button = tk.Button(self, text="Login", command=self.login_user)
+        self.login_button.pack(pady=20)
 
-        # Register button
-        tk.Button(self, text="Register", command=self.switch_to_register).pack(pady=10)
+        self.register_button = tk.Button(self, text="Register", command=self.switch_to_register)
+        self.register_button.pack(pady=10)
 
-        # Optional Admin Login button
         if self.switch_to_admin_login:
-            tk.Button(self, text="Admin Login", fg="red", command=self.switch_to_admin_login).pack(pady=10)
+            self.admin_button = tk.Button(self, text="Admin Login", fg="red", command=self.switch_to_admin_login)
+            self.admin_button.pack(pady=10)
+
+    def apply_theme(self):
+        """Apply theme colors to all widgets."""
+        widgets = self.winfo_children()
+        for w in widgets:
+            if isinstance(w, tk.Label):
+                w.configure(bg=self.theme["bg"], fg=self.theme["fg"])
+            elif isinstance(w, tk.Entry):
+                w.configure(bg="white")
+            elif isinstance(w, tk.Button):
+                w.configure(
+                    bg=self.theme["button_bg"],
+                    fg=self.theme["button_fg"],
+                    activebackground=self.theme["fg"],
+                    activeforeground=self.theme["bg"]
+                )
 
     def login_user(self):
         email = self.email_entry.get().strip()
@@ -49,8 +72,8 @@ class LoginPage(tk.Frame):
 
             if result:
                 messagebox.showinfo("Success", f"Welcome {email}!")
-                self.destroy()  # remove login frame
-                DashboardPage(self.master, email)  # navigate to user dashboard
+                self.destroy()
+                DashboardPage(self.master, email)
             else:
                 messagebox.showerror("Error", "Invalid email or password")
         except Exception as e:

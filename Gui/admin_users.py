@@ -7,29 +7,68 @@ class AdminUsersPage(tk.Frame):
         super().__init__(master)
         self.master = master
         self.dashboard_frame = dashboard_frame
+        self.theme = master.get_theme()  # get current theme
+        self.configure(bg=self.theme["bg"])
         self.pack(fill="both", expand=True)
         self.create_widgets()
+        self.apply_theme()
         self.load_users()
 
     def create_widgets(self):
-        tk.Label(self, text="👥 Manage Users", font=("Helvetica", 16, "bold")).pack(pady=10)
+        self.title_label = tk.Label(self, text="👥 Manage Users", font=("Helvetica", 16, "bold"))
+        self.title_label.pack(pady=10)
 
         # CRUD buttons
-        button_frame = tk.Frame(self)
-        button_frame.pack(pady=5)
+        self.button_frame = tk.Frame(self, bg=self.theme["bg"])
+        self.button_frame.pack(pady=5)
 
-        tk.Button(button_frame, text="Add User", command=lambda: self.user_window("Add User")).pack(side="left", padx=5)
-        tk.Button(button_frame, text="Edit Selected User", command=self.edit_user_window).pack(side="left", padx=5)
-        tk.Button(button_frame, text="Delete Selected User", command=self.delete_user).pack(side="left", padx=5)
-        tk.Button(button_frame, text="← Back to Dashboard", command=self.back_to_dashboard).pack(side="left", padx=5)
+        self.add_btn = tk.Button(self.button_frame, text="Add User", command=lambda: self.user_window("Add User"))
+        self.edit_btn = tk.Button(self.button_frame, text="Edit Selected User", command=self.edit_user_window)
+        self.del_btn = tk.Button(self.button_frame, text="Delete Selected User", command=self.delete_user)
+        self.back_btn = tk.Button(self.button_frame, text="← Back to Dashboard", command=self.back_to_dashboard)
+
+        for b in (self.add_btn, self.edit_btn, self.del_btn, self.back_btn):
+            b.pack(side="left", padx=5)
 
         # Treeview to display users
         columns = ("user_id", "name", "email", "phone", "membership_type", "role")
         self.tree = ttk.Treeview(self, columns=columns, show="headings")
+
         for col in columns:
             header = col.replace("_", " ").title()
             self.tree.heading(col, text=header)
+
         self.tree.pack(fill="both", expand=True, pady=10)
+
+        # Apply theme to Treeview
+        style = ttk.Style()
+        style.configure("Treeview",
+                        background=self.theme["bg"],
+                        foreground=self.theme["fg"],
+                        fieldbackground=self.theme["bg"],
+                        font=("Helvetica", 10))
+        style.configure("Treeview.Heading",
+                        background=self.theme["button_bg"],
+                        foreground=self.theme["button_fg"],
+                        font=("Helvetica", 10, "bold"))
+        style.map("Treeview", background=[("selected", self.theme["fg"])])
+
+    def apply_theme(self):
+        """Apply theme colors to all widgets."""
+        widgets = [self, self.button_frame, self.title_label,
+                   self.add_btn, self.edit_btn, self.del_btn, self.back_btn]
+        for w in widgets:
+            if isinstance(w, tk.Label):
+                w.configure(bg=self.theme["bg"], fg=self.theme["fg"])
+            elif isinstance(w, tk.Frame):
+                w.configure(bg=self.theme["bg"])
+            elif isinstance(w, tk.Button):
+                w.configure(
+                    bg=self.theme["button_bg"],
+                    fg=self.theme["button_fg"],
+                    activebackground=self.theme["fg"],
+                    activeforeground=self.theme["bg"]
+                )
 
     def load_users(self):
         for row in self.tree.get_children():
@@ -56,17 +95,17 @@ class AdminUsersPage(tk.Frame):
         window = tk.Toplevel(self)
         window.title(action)
         window.geometry("400x450")
+        window.configure(bg=self.theme["bg"])
 
         labels = ["Name", "Email", "Phone", "Password", "Membership Type", "Role"]
         entries = {}
 
         for label in labels:
-            tk.Label(window, text=f"{label}:").pack(pady=5)
+            tk.Label(window, text=f"{label}:", bg=self.theme["bg"], fg=self.theme["fg"]).pack(pady=5)
             entry = tk.Entry(window)
             entry.pack(pady=5)
             entries[label] = entry
 
-        # Pre-fill if editing
         if user:
             entries["Name"].insert(0, user[1])
             entries["Email"].insert(0, user[2])
@@ -125,7 +164,15 @@ class AdminUsersPage(tk.Frame):
             except Exception as e:
                 messagebox.showerror("Error", f"{action} failed: {e}")
 
-        tk.Button(window, text="Save", command=save).pack(pady=20)
+        tk.Button(
+            window,
+            text="Save",
+            command=save,
+            bg=self.theme["button_bg"],
+            fg=self.theme["button_fg"],
+            activebackground=self.theme["fg"],
+            activeforeground=self.theme["bg"]
+        ).pack(pady=20)
 
     def delete_user(self):
         selected = self.tree.focus()

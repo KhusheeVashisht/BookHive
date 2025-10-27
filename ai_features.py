@@ -5,6 +5,7 @@ import random
 
 # ---------------------- USER BOOK RECOMMENDER ----------------------
 def recommend_books(user_id):
+    """Recommends books to a user based on their rental history."""
     try:
         conn = create_connection()
         cursor = conn.cursor()
@@ -42,15 +43,15 @@ def recommend_books(user_id):
 # ---------------------- ADMIN AI QUERY ASSISTANT ----------------------
 def admin_ai_query(question: str):
     """
-    Interprets admin questions and runs simple analytics queries.
-    If unrelated to BookHive, returns a polite fallback message.
+    Interprets admin questions and runs analytics queries.
+    Returns (headers, data, message).
     """
     question_lower = question.lower().strip()
     conn = create_connection()
     cursor = conn.cursor()
 
     try:
-        # TOP RENTED BOOKS
+        # 🔹 TOP RENTED BOOKS
         if "top" in question_lower and "rent" in question_lower:
             cursor.execute("""
                 SELECT b.title, COUNT(r.rental_id) AS total_rented
@@ -64,7 +65,7 @@ def admin_ai_query(question: str):
             headers = ["Book Title", "Total Rentals"]
             return headers, data, "📊 Top rented books retrieved successfully!"
 
-        # TOP PURCHASED / TRANSACTIONS
+        # 🔹 TOP PURCHASED BOOKS
         elif "buy" in question_lower or "purchase" in question_lower:
             cursor.execute("""
                 SELECT b.title, COUNT(t.transaction_id) AS total_sales
@@ -78,7 +79,7 @@ def admin_ai_query(question: str):
             headers = ["Book Title", "Total Purchases"]
             return headers, data, "💰 Top purchased books retrieved successfully!"
 
-        # MEMBERSHIP DISTRIBUTION
+        # 🔹 MEMBERSHIP DISTRIBUTION
         elif "membership" in question_lower or "member" in question_lower:
             cursor.execute("""
                 SELECT membership_type, COUNT(user_id)
@@ -89,7 +90,7 @@ def admin_ai_query(question: str):
             headers = ["Membership Type", "Count"]
             return headers, data, "👥 Membership distribution retrieved successfully!"
 
-        # TOTAL COUNTS
+        # 🔹 TOTAL COUNTS
         elif "count" in question_lower or "total" in question_lower:
             cursor.execute("SELECT COUNT(*) FROM users")
             total_users = cursor.fetchone()[0]
@@ -105,7 +106,7 @@ def admin_ai_query(question: str):
             headers = ["Entity", "Count"]
             return headers, summary, "📘 System totals generated successfully!"
 
-        # Unrelated Question → fallback
+        # 🔹 Fallback for unrelated queries
         else:
             return [], [], (
                 "🤖 I'm sorry, I can only assist with BookHive-related data.\n"

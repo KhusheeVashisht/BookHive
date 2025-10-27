@@ -8,63 +8,70 @@ class DashboardPage(tk.Frame):
         super().__init__(master)
         self.master = master
         self.email = email
+        self.theme = master.get_theme()
+        self.configure(bg=self.theme["bg"])
         self.pack(fill="both", expand=True)
 
-        # Fetch both user_id and name
         self.user_id, self.username = self.get_user_info(email)
         self.create_widgets()
+        self.apply_theme()
 
     def get_user_info(self, email):
-        """Fetch user_id and name from the database using email."""
         try:
             conn = create_connection()
             cursor = conn.cursor()
             cursor.execute("SELECT user_id, name FROM users WHERE email=%s", (email,))
             result = cursor.fetchone()
             conn.close()
-
-            if result:
-                return result[0], result[1]  # (user_id, name)
-            else:
-                return None, email  # fallback
+            return result if result else (None, email)
         except Exception as e:
             print("Error fetching user info:", e)
             return None, email
 
     def create_widgets(self):
-        tk.Label(
+        self.title_label = tk.Label(
             self, text=f"📊 Welcome {self.username}!",
             font=("Helvetica", 16, "bold")
-        ).pack(pady=20)
+        )
+        self.title_label.pack(pady=20)
 
-        tk.Button(
+        self.book_button = tk.Button(
             self, text="📚 Book Operations", width=20,
             command=self.open_book_operations
-        ).pack(pady=10)
+        )
+        self.book_button.pack(pady=10)
 
-        tk.Button(
+        self.analytics_button = tk.Button(
             self, text="📈 View My Analytics", width=20,
             command=self.show_dashboard
-        ).pack(pady=10)
+        )
+        self.analytics_button.pack(pady=10)
 
-        tk.Button(
+        self.logout_button = tk.Button(
             self, text="🚪 Logout", width=20,
             command=self.logout
-        ).pack(pady=20)
+        )
+        self.logout_button.pack(pady=20)
+
+    def apply_theme(self):
+        for w in self.winfo_children():
+            if isinstance(w, tk.Label):
+                w.configure(bg=self.theme["bg"], fg=self.theme["fg"])
+            elif isinstance(w, tk.Button):
+                w.configure(
+                    bg=self.theme["button_bg"],
+                    fg=self.theme["button_fg"],
+                    activebackground=self.theme["fg"],
+                    activeforeground=self.theme["bg"]
+                )
 
     def open_book_operations(self):
         self.pack_forget()
-        # Pass both user_id (for DB) and email (for display)
         BookOperations(self.master, self.user_id, self.email)
- # not username
-
 
     def show_dashboard(self):
         if self.user_id:
-            # Hide current dashboard frame
             self.pack_forget()
-
-            # Create the analytics frame and store it
             self.analytics_frame = UserAnalytics(
                 self.master, self.user_id, self.username,
                 switch_to_dashboard=self.back_to_dashboard
@@ -74,18 +81,11 @@ class DashboardPage(tk.Frame):
             tk.messagebox.showerror("Error", "User information not found.")
 
     def back_to_dashboard(self):
-        # Hide the analytics frame
         if hasattr(self, "analytics_frame"):
             self.analytics_frame.pack_forget()
             self.analytics_frame.destroy()
-            del self.analytics_frame
-
-        # Show this dashboard again
         self.pack(fill="both", expand=True)
 
-
-
     def logout(self):
-        """Return to the login page"""
         self.pack_forget()
         self.master.show_login()
