@@ -27,8 +27,8 @@ This project demonstrates integration of database management, web development, a
 ---
 
 ## Technologies Used
-- **Frontend:** HTML, CSS, JavaScript
-- **Backend:** PHP (XAMPP)
+- **Frontend:** Python Tkinter
+- **Backend:** MySql
 - **Database:** MariaDB (via XAMPP)
 - **Algorithms:** DAA (searching/sorting)
 - **AI:** Recommendation system (Python)
